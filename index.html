@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Wellenrauschen</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌊</text></svg>">
+<meta name="description" content="Wellenrauschen.">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, max-image-preview:none, notranslate" />
+    <style type="text/css">
+        #bg {
+          position: fixed; 
+          top: -50%; 
+          left: -50%; 
+          width: 200%; 
+          height: 200%;
+      }
+      #bg img {
+          position: absolute; 
+          top: 0; 
+          left: 0; 
+          right: 0; 
+          bottom: 0; 
+          margin: auto; 
+          min-width: 50%;
+          min-height: 50%;
+		  z-index:80;
+      }
+	  
+	     #start{
+          position: absolute; 
+          top: 0; 
+          left: 0; 
+          right: 0; 
+          bottom: 0; 
+          margin: auto; 
+			height:2em;
+			width:4em;
+			font-size:2em;
+			border-radius:15px;
+		   z-index:100;
+      }
+	  
+	  /*Thx to https://stackoverflow.com/questions/14068103/disable-antialising-when-scaling-images  */
+	  img { 
+    image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+    image-rendering: -moz-crisp-edges;          /* Firefox                        */
+    image-rendering: -o-crisp-edges;            /* Opera                          */
+    image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+    image-rendering: pixelated;                 /* Universal support since 2021   */
+    image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+	image-rendering: pixelated;
+}
+  </style>
+</head>
+<body> 
+   <button id="start" onclick="startit();" style="display:none;">Start</button>
+   
+ <div id="bg">
+   <!-- 
+   https://pixabay.com/photos/coast-waves-beach-ocean-sea-6310250/
+   User: https://pixabay.com/users/kanenori-4749850/
+   -->
+  <img src="img/coast-g45f94a45b_640.jpg" alt="">
+
+</div>
+
+
+<script type="text/javascript" src="js/noise.js"></script>
+<script type="text/javascript">
+
+setTimeout(function() {
+	const input = prompt("Wie lange soll es rauschen? (in Minuten)")
+	duration = parseInt( `${input}`, 10 );
+	if(isNaN(duration)){duration = 1}
+
+	document.getElementById('start').style.display = "block";
+	
+	// Thx to https://noisehack.com/generate-noise-web-audio-api/
+	audioContext = new (window.webkitAudioContext || window.AudioContext)();
+	audioContext2 = new (window.webkitAudioContext || window.AudioContext)();
+	audioContext3 = new (window.webkitAudioContext || window.AudioContext)();
+
+	whiteNoise = audioContext.createWhiteNoise();
+	whiteGain = audioContext.createGain();
+	whiteGain.gain.value = 0;
+	whiteNoise.connect(whiteGain);
+	whiteGain.connect(audioContext.destination);
+
+	pinkNoise = audioContext.createPinkNoise();
+	pinkGain = audioContext.createGain();
+	pinkGain.gain.value = 0;
+	pinkNoise.connect(pinkGain);
+	pinkGain.connect(audioContext.destination);
+
+	brownNoise = audioContext.createBrownNoise();
+	brownGain = audioContext.createGain();
+	brownGain.gain.value = 0;
+	brownNoise.connect(brownGain);
+	brownGain.connect(audioContext.destination);
+
+	brownNoise2 = audioContext2.createBrownNoise();
+	brownGain2 = audioContext2.createGain();
+	brownGain2.gain.value = 0;
+	brownNoise2.connect(brownGain2);
+	brownGain2.connect(audioContext2.destination);
+
+	brownNoise3 = audioContext3.createBrownNoise();
+	brownGain3 = audioContext3.createGain();
+	brownGain3.gain.value = 0;
+	brownNoise3.connect(brownGain3);
+	brownGain3.connect(audioContext3.destination);
+
+	lfo = audioContext.createOscillator();
+	lfo.frequency.value = 0.01;
+	lfo.frequency.value = 0.08;
+	lfo.frequency.value = 0.095;
+	lfoGain = audioContext.createGain();
+	lfoGain.gain.value = 0.02;
+	lfoGain.gain.value = 0.2;
+
+	lfo2 = audioContext2.createOscillator();
+	lfo2.frequency.value = 0.00000000000000000000000000000001;
+	lfoGain2 = audioContext2.createGain();
+	lfoGain2.gain.value = 0.02;
+	lfoGain2.gain.value = 0.3	;
+
+	lfo3 = audioContext3.createOscillator();
+	lfo3.frequency.value = 0.1;
+	lfoGain3 = audioContext3.createGain();
+	lfoGain3.gain.value = 0.02;
+	lfoGain3.gain.value = 0.1	;
+	lfoGain3.gain.value = 0.4	;
+
+	iteration = 0;
+	max = duration*60
+}, 1000);
+
+function startit() {
+	document.getElementById('start').style.display = "none";
+	alert(`Dauer: `+duration+' Minuten');
+
+	try  {
+	wave1();
+	wave2();
+	wave3();
+	myVar = setInterval(wavetimer ,1000);
+	}
+	catch(err) {alert(err.message);}
+}
+
+function wave1() {
+	brownGain.gain.value = 0.25;
+	lfo.start(0);
+	lfo.connect(lfoGain);
+	lfoGain.connect(brownGain.gain);
+}
+
+function wave2() {
+	brownGain2.gain.value = 0.2;
+	lfo2.start(0);
+	lfo2.connect(lfoGain2);
+	lfoGain2.connect(brownGain2.gain);
+}
+
+function wave3() {
+	brownGain3.gain.value = 0.3;
+	lfo3.start(0);
+	lfo3.connect(lfoGain3);
+	lfoGain3.connect(brownGain3.gain);
+}
+
+function wavetimer() {
+	if(iteration<max){} else {stop();}
+	console.log(iteration);
+	iteration++;
+}
+
+function stop()
+{
+	clearInterval(myVar);
+	audioContext.close();
+	audioContext2.close();
+	audioContext3.close();
+	iteration = 0;
+}
+
+</script>
+
+</body> 
+</html> 
